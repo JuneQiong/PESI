@@ -85,7 +85,7 @@ def data_in_one(inputdata):
     return outputdata
 
 class Model(nn.Module):
-    def __init__(self, src_len, tgt_len, pad_idx, nuser, nitem, ntokens, lamda):
+    def __init__(self, src_len, tgt_len, pad_idx, nuser, nitem, ntokens):
         super(Model, self).__init__()
         self.user_embed_ra = nn.Embedding(num_embeddings=nuser, embedding_dim=args.emsize)
         self.user_embed_re = nn.Embedding(num_embeddings=nuser, embedding_dim=args.emsize)
@@ -94,7 +94,6 @@ class Model(nn.Module):
         # self.rating_embed = OrderEmbedding(num_embeddings=5, embedding_dim=args.emsize)
         self.rating_embed = nn.Embedding(num_embeddings=7, embedding_dim=args.emsize)
         self.pad_idx = pad_idx
-        self.lamda = lamda
         self.linear1 = nn.Linear(args.emsize * 2, args.emsize, bias=True).to('cuda')
         self.linear2 = nn.Linear(args.emsize * 2, args.emsize, bias=True).to('cuda')
         self.linear3 = nn.Linear(args.emsize * 2, args.emsize).to('cuda')
@@ -157,7 +156,7 @@ class Model(nn.Module):
         de_re_c = self.de_re(re_c.mean(0).squeeze())  # 256.512
         de_re_s = self.de_re(re_s.mean(0).squeeze())  # 256.512
 
-        ui_re_spa_emb = uire_emb + self.lamda * ra_s.unsqueeze(0).repeat((encoder_hidden.shape[0], 1, 1))
+        ui_re_spa_emb = uire_emb + 3*ra_s.unsqueeze(0).repeat((encoder_hidden.shape[0], 1, 1))
         # ui_re_spa_emb = F.normalize(ui_re_spa_emb)
         if mode == "Train":
             word_prob = self.hidden2token(ui_re_spa_emb)  # (tgt_len, batch_size, ntoken)

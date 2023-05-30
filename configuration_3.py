@@ -14,7 +14,7 @@ def parse():
                         help='the number of heads in the transformer')
     parser.add_argument('--nhid', type=int, default=2048,
                         help='number of hidden units per layer')
-    parser.add_argument('--nlayers', type=int, default=6,
+    parser.add_argument('--nlayers', type=int, default=4,
                         help='number of layers')
     parser.add_argument('--dropout', type=float, default=0.1,
                         help='dropout applied to layers (0 = no dropout)')
@@ -60,9 +60,7 @@ def parse():
                         help='False: no feature; True: use the feature')
     parser.add_argument('--words', type=int, default=15,
                         help='number of words to generate for each sample')
-    parser.add_argument('--gamma', type=float, default=0.15,
-                        help='number of words to generate for each sample')
-    parser.add_argument('--lamda', type=int, default=190,
+    parser.add_argument('--gamma', type=float, default=1.5,
                         help='number of words to generate for each sample')
     # temperature
     parser.add_argument('--temp', type=float, default=0.07,

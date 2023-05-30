@@ -12,6 +12,47 @@ from bleu import compute_bleu
 from textblob import TextBlob
 
 
+# def different(references, generated):
+#     real_senti = []
+#     fake_senti = []
+#     true_num = 0
+#     for (real, fake) in zip(references, generated):
+#         if len(real) > 2:
+#             blob = TextBlob(real).sentences[0].sentiment.polarity
+#         else:
+#             blob = 0
+#         if blob < -0.0001:
+#             real_blob_senti = 0
+#         elif blob >= -0.0001 and blob <= 0.0001:
+#             real_blob_senti = 1
+#         else:
+#             real_blob_senti = 2
+#         real_senti.append(real_blob_senti)
+#
+#         if len(fake) > 2:
+#             blob = TextBlob(fake).sentences[0].sentiment.polarity
+#         else:
+#             blob = 0
+#         if blob < -0.0001:
+#             fake_blob_senti = 0
+#         elif blob >= -0.0001 and blob <= 0.0001:
+#             fake_blob_senti = 1
+#         else:
+#             fake_blob_senti = 2
+#         fake_senti.append(fake_blob_senti)
+#
+#     pdb.set_trace()
+#     from sklearn.metrics import f1_score, accuracy_score, confusion_matrix, precision_score
+#     import sklearn.utils.class_weight
+#     mf1 = f1_score(real_senti, fake_senti, average='macro')
+#     mf2 = f1_score(real_senti, fake_senti, average='micro')
+#     f1_score(real_senti, fake_senti, labels=[0, 1, 2], average='weighted')
+#     accuracy_score(real_senti, fake_senti, normalize=True, sample_weight=None)
+#     precision_score(real_senti, fake_senti, average="weighted")
+#     from metric import cal_precision_and_recall
+#     cal_precision_and_recall(real_senti, fake_senti)
+#     rouge(real_senti, fake_senti)
+
 def rouge_score(references, generated):
     """both are a list of strings"""
     score = rouge(generated, references)
@@ -48,26 +89,15 @@ def two_seq_same(sa, sb):
 
 def unique_sentence_percent(sequence_batch):
     unique_seq = []
-    count_seq = {}
-
     for seq in sequence_batch:
         count = 0
         for uni_seq in unique_seq:
             if two_seq_same(seq, uni_seq):
                 count += 1
-                mod_seq = ' '.join(uni_seq)
-                if mod_seq in count_seq.keys():
-                    mod_count = count_seq[mod_seq]
-                    count_seq[mod_seq] = mod_count + 1
-                else:
-                    count_seq[mod_seq] = 1
                 break
         if count == 0:
             unique_seq.append(seq)
-    import operator
-    # newfea = dict(sorted(count_seq.items(),key = lambda x:x[1],reverse = True))
-    # list(newfea.keys())[0:10]
-    # pdb.set_trace()
+
     return len(unique_seq) / len(sequence_batch), len(unique_seq)
 
 
@@ -294,7 +324,7 @@ class DataLoader:
         # train = sorted(train, key=lambda e: e.__getitem__('item'))
         random.shuffle(train)
         random.shuffle(valid)
-        test = sorted(test, key=lambda e: e.__getitem__('rating'))
+        # test = sorted(test, key=lambda e: e.__getitem__('rating'))
         return train, valid, test
 
     def seq2ids(self, seq):

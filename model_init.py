@@ -8,7 +8,7 @@ import torch.nn.functional as func
 from typing import Tuple, Optional
 from torch import Tensor
 import torch.nn.functional as F
-from new_mutilhead import MyMultiheadAttention
+# from new_mutilhead import MyMultiheadAttention
 
 class TransformerEncoderLayer(nn.Module):
     r"""TransformerEncoderLayer is made up of self-attn and feedforward network.
@@ -33,8 +33,8 @@ class TransformerEncoderLayer(nn.Module):
 
     def __init__(self, d_model, nhead, dim_feedforward=2048, dropout=0.1, activation="relu"):
         super(TransformerEncoderLayer, self).__init__()
-        # self.self_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)
-        self.self_attn = MyMultiheadAttention(d_model, nhead)
+        self.self_attn = nn.MultiheadAttention(d_model, nhead, dropout=dropout)
+        # self.self_attn = MyMultiheadAttention(d_model, nhead)
         # Implementation of Feedforward model
         self.linear1 = nn.Linear(d_model, dim_feedforward)
         self.dropout = nn.Dropout(dropout)
@@ -64,9 +64,9 @@ class TransformerEncoderLayer(nn.Module):
         Shape:
             see the docs in Transformer class.
         """
-        # src2, attn = self.self_attn(src, src, src, attn_mask=src_mask,
-        #                             key_padding_mask=src_key_padding_mask)
-        src2, attn = self.self_attn(src, src, src, attn_mask=src_mask, key_padding_mask=src_key_padding_mask)
+        src2, attn = self.self_attn(src, src, src, attn_mask=src_mask,
+                                    key_padding_mask=src_key_padding_mask)
+        # src2, attn = self.self_attn(src, src, src, attn_mask=src_mask, key_padding_mask=src_key_padding_mask)
         src = src + self.dropout1(src2)
         src = self.norm1(src)
         src2 = self.linear2(self.dropout(self.activation(self.linear1(src))))
@@ -331,8 +331,7 @@ class PETER(nn.Module):
         attn_mask = self.attn_mask[:total_len+1, :total_len+1].to(device)  # (total_len, total_len)
         left = torch.zeros(batch_size, 1).bool().to(device)  # (batch_size, ui_len)
         right = text.t() == self.pad_idx  # replace pad_idx with True and others with False, (batch_size, total_len - ui_len)
-        # right = text.t() == -200  # replace pad_idx with True and others with False, (batch_size, total_len - ui_len)
-        key_padding_mask = torch.cat([left, right], 1) # (batch_size, total_len)
+        key_padding_mask = torch.cat([left, right], 1)  # (batch_size, total_len)
 
         w_src = self.word_embeddings(text)  # (total_len - ui_len, batch_size, emsize) 16,64,512
         src = w_src  # (total_len, batch_size, emsize)
@@ -349,13 +348,13 @@ class PETER(nn.Module):
         hu = st * math.sqrt(self.emsize)
         hu = self.pos_encoder(hu)
         # 18,64,512,    18,18,   ,64,18
-
+        hidden, attns = self.transformer_encoder(hu, attn_mask, key_padding_mask)  # (total_len, batch_size, emsize) vs. (nlayers, batch_size, total_len_tgt, total_len_src)
         if seq_prediction:
             # hidden, attns = self.transformer_encoder(hu, src_key_padding_mask=key_padding_mask)
-            hidden, attns = self.transformer_encoder(hu, attn_mask, key_padding_mask)
+            # hidden, attns = self.transformer_encoder(hu, attn_mask, key_padding_mask)
             log_word_prob = self.predict_seq(hidden)  # (tgt_len, batch_size, ntoken)
         else:
-            hidden, attns = self.transformer_encoder(hu, attn_mask, key_padding_mask)
+            # hidden, attns = self.transformer_encoder(hu, attn_mask, key_padding_mask)
             log_word_prob = self.generate_token(hidden)  # (batch_size, ntoken)
         # get contrastive loss hidden vector
         hidden[self.src_len + 1:].  transpose(0, 1)

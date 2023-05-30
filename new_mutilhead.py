@@ -95,13 +95,13 @@ def multi_head_attention_forward(
                 raise RuntimeError('The size of the 3D attn_mask is not correct.')
 
     ui = query[0, :, :]  # [256, 512]
-    ui = ui.contiguous().view(bsz * num_heads, head_dim).transpose(0, 1)  # [64,2048]
-    q = q.contiguous().view(tgt_len, bsz * num_heads, head_dim).transpose(0, 1) # [2048, 17, 64]
+    ui = ui.contiguous().view(bsz * num_heads, head_dim).transpose(0, 1)
+    q = q.contiguous().view(tgt_len, bsz * num_heads, head_dim).transpose(0, 1)
     # [batch_size * num_heads,tgt_len,kdim]
-    pdb.set_trace()
     k = k.contiguous().view(-1, bsz * num_heads, head_dim).transpose(0, 1)  # [batch_size * num_heads,src_len,kdim]
     v = v.contiguous().view(-1, bsz * num_heads, head_dim).transpose(0, 1)  # [batch_size * num_heads,src_len,vdim]
-    qr = torch.matmul(ui, qr) #[64,2048] * [2048, 17] =  64*17
+
+    qr = torch.matmul(ui, qr)
     kr = torch.matmul(ui, kr)
     #
     # weight = torch.ones(tgt_len, 1).to("cuda")
@@ -110,9 +110,9 @@ def multi_head_attention_forward(
     # Qr = torch.matmul(q, qr[:, 0:tgt_len])
     # Kr = torch.matmul(k, kr[:, 0:tgt_len])
     # QK = torch.matmul(torch.mul(q, weight), torch.mul(k, weight).transpose(1, 2))
-    pdb.set_trace()
-    q_r = torch.matmul(q, qr[:, 0:tgt_len]) # [[2048, 17, 64] * [64*17] = [2048, 17, 17]
-    k_r = torch.matmul(k, kr[:, 0:tgt_len]) #
+
+    q_r = torch.matmul(q, qr[:, 0:tgt_len])
+    k_r = torch.matmul(k, kr[:, 0:tgt_len])
     attn_output_weights = (torch.bmm(q, k.transpose(1, 2)) + q_r + k_r)
     bn = nn.BatchNorm1d(tgt_len).to('cuda')
 
@@ -132,7 +132,6 @@ def multi_head_attention_forward(
         attn_output_weights = attn_output_weights.view(bsz * num_heads, tgt_len, src_len)
         # [batch_size * num_heads, tgt_len, src_len]
     attn_output_weights = F.softmax(attn_output_weights, dim=-1)  # [batch_size * num_heads, tgt_len, src_len]
-    # attn_output_weights = attn_output_weights.view(-1, bsz, tgt_len, src_len)
     attn_output_weights = F.dropout(attn_output_weights, p=dropout_p, training=training)
 
     attn_output = torch.bmm(attn_output_weights,  v + vr[0:tgt_len, :])
