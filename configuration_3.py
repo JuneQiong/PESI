@@ -14,7 +14,7 @@ def parse():
                         help='the number of heads in the transformer')
     parser.add_argument('--nhid', type=int, default=2048,
                         help='number of hidden units per layer')
-    parser.add_argument('--nlayers', type=int, default=4,
+    parser.add_argument('--nlayers', type=int, default=6,
                         help='number of layers')
     parser.add_argument('--dropout', type=float, default=0.1,
                         help='dropout applied to layers (0 = no dropout)')
