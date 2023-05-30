@@ -324,7 +324,7 @@ class DataLoader:
         # train = sorted(train, key=lambda e: e.__getitem__('item'))
         random.shuffle(train)
         random.shuffle(valid)
-        # test = sorted(test, key=lambda e: e.__getitem__('rating'))
+        test = sorted(test, key=lambda e: e.__getitem__('rating'))
         return train, valid, test
 
     def seq2ids(self, seq):

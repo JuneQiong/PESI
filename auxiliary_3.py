@@ -156,7 +156,7 @@ class Model(nn.Module):
         de_re_c = self.de_re(re_c.mean(0).squeeze())  # 256.512
         de_re_s = self.de_re(re_s.mean(0).squeeze())  # 256.512
 
-        ui_re_spa_emb = uire_emb + 3*ra_s.unsqueeze(0).repeat((encoder_hidden.shape[0], 1, 1))
+        ui_re_spa_emb = uire_emb + uira_emb
         # ui_re_spa_emb = F.normalize(ui_re_spa_emb)
         if mode == "Train":
             word_prob = self.hidden2token(ui_re_spa_emb)  # (tgt_len, batch_size, ntoken)
